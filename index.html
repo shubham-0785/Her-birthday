@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HBD ANU</title>
+    <link type="text/css" rel="stylesheet" href="file/default.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="file/love.js" charset="utf-8"></script>
+    <script type="text/javascript" src="file/function.js" charset="utf-8"></script>
+    <script>
+        function playAudio() {
+            var audio = document.getElementById("myAudio");
+            audio.play();
+        }
+    </script>
+</head>
+<body>
+    <div id="main">
+        <div id="error">Please use <a href="https://www.google.com/chrome/">Chrome</a> or <a href="https://www.mozilla.org/firefox/">Firefox</a></div>
+        <audio autoplay="autoplay" id="myAudio">
+            <source src="aud.mp3" type="audio/mp3" />
+        </audio>
+        <div id="wrap">
+            <div id="text">
+              <div id="code">
+                    <span class="say">Hey 💞</span><br>
+                    <span class="say">HAPPY BIRTHDAY 🎈</span><br>
+                    <span class="say">May God bless you 🍀</span><br>
+                    <span class="say">And give U many happiness 💕</span><br>
+                    <span class="say">Just saying... you're pretty awesome ❤️</span><br>
+                    <span class="say">I Love your eyes 👀🫠</span><br>
+                    <span class="say">Sending good vibes and maybe some smile 😏</span><br>
+                    <span class="say">Hope u have a great day today ❤️</span><br>
+                </div>
+            </div>
+            <div id="clock-box">
+                <span id="clock">0 days 0 hours 0 minutes 0 seconds</span>
+            </div>
+            <canvas id="canvas" width="1100" height="680"></canvas>
+        </div>
+    </div>
+
+<script>
+(function() {
+    var canvas = $('#canvas');
+    if (!canvas[0].getContext) { $("#error").show(); return; }
+
+    var width = canvas.width(), height = canvas.height();
+    canvas.attr("width", width).attr("height", height);
+
+    var opts = {
+        seed: { x: width / 2 - 20, color: "rgb(190, 26, 37)", scale: 2 },
+        branch: [[535,680,570,250,500,200,30,100,[
+            [540,500,455,417,340,400,13,100,[[450,435,434,430,394,395,2,40]]],
+            [550,445,600,356,680,345,12,100,[[578,400,648,409,661,426,3,80]]],
+            [539,281,537,248,534,217,3,40],
+            [546,397,413,247,328,244,9,80,[[427,286,383,253,371,205,2,40],[498,345,435,315,395,330,4,60]]],
+            [546,357,608,252,678,221,6,100,[[590,293,646,277,648,271,2,80]]]
+        ]]],
+        bloom: { num: 700, width: 1080, height: 650 },
+        footer: { width: 1200, height: 5, speed: 10 }
+    };
+
+    var tree = new Tree(canvas[0], width, height, opts);
+    var seed = tree.seed, foot = tree.footer, hold = true;
+
+    canvas.click(function(e) {
+        playAudio();
+        var offset = canvas.offset();
+        var x = e.pageX - offset.left, y = e.pageY - offset.top;
+        if (seed.hover(x, y)) {
+            hold = false;
+            canvas.unbind("click").unbind("mousemove").removeClass('hand');
+        }
+    }).mousemove(function(e) {
+        var offset = canvas.offset();
+        canvas.toggleClass('hand', seed.hover(e.pageX - offset.left, e.pageY - offset.top));
+    });
+
+    // Replacement for jscex async using plain promise chaining
+    function sleep(ms) {
+        return new Promise(function(resolve) { setTimeout(resolve, ms); });
+    }
+
+    function waitForClick() {
+        return new Promise(function(resolve) {
+            var check = setInterval(function() {
+                if (!hold) { clearInterval(check); resolve(); }
+            }, 10);
+        });
+    }
+
+    async function seedAnimate() {
+        seed.draw();
+        await waitForClick();
+        while (seed.canScale()) { seed.scale(0.95); await sleep(10); }
+        while (seed.canMove()) { seed.move(0, 2); foot.draw(); await sleep(10); }
+    }
+
+    async function growAnimate() {
+        do { tree.grow(); await sleep(10); } while (tree.canGrow());
+    }
+
+    async function flowAnimate() {
+        do { tree.flower(2); await sleep(10); } while (tree.canFlower());
+    }
+
+    async function moveAnimate() {
+        tree.snapshot("p1", 240, 0, 610, 680);
+        while (tree.move("p1", 500, 0)) { foot.draw(); await sleep(10); }
+        foot.draw();
+        tree.snapshot("p2", 500, 0, 610, 680);
+        canvas.parent().css("background", "url(" + tree.toDataURL('image/png') + ")");
+        canvas.css("background", "#ffe");
+        await sleep(300);
+        canvas.css("background", "none");
+    }
+
+    async function textAnimate() {
+        $("#code").show().typewriter();
+    }
+
+    async function run() {
+        await seedAnimate();
+        await growAnimate();
+        await flowAnimate();
+        await moveAnimate();
+        await textAnimate();
+    }
+
+    run();
+})();
+</script>
+</body>
+</html>
