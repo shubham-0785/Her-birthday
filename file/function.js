@@ -59,5 +59,5 @@ function timeElapse(date) {
 
 // FIX: call timeElapse every second — change the date to her actual birthday!
 setInterval(function() {
-    timeElapse("JUN 22, 2005");
+    timeElapse("JUN 22, 2006");
 }, 1000);
